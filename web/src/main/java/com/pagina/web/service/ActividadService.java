@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,7 +27,8 @@ public class ActividadService {
     private final ActividadRepository actividadRepository;
     private final ReaRepository reaRepository;
 
-    private static final String UPLOAD_DIR = "uploads/";
+    @Value("${file.upload-dir}")
+    private String uploadDir;
 
     public List<actividad> listarTodas() {
         return actividadRepository.findAll();
@@ -57,8 +59,8 @@ public class ActividadService {
 
         try {
 
-            // Crear carpeta si no existe
-            Path uploadPath = Paths.get(UPLOAD_DIR);
+            Path uploadPath = Paths.get(uploadDir);
+
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath);
             }
@@ -67,10 +69,8 @@ public class ActividadService {
 
             Path rutaArchivo = uploadPath.resolve(nombreArchivo);
 
-            // Guardar archivo en disco
             Files.copy(archivo.getInputStream(), rutaArchivo, StandardCopyOption.REPLACE_EXISTING);
 
-            // Guardar ruta en base de datos
             actividad.setArchivo(nombreArchivo);
             actividadRepository.save(actividad);
 
@@ -91,10 +91,10 @@ public class ActividadService {
         if (nombreArchivo != null && !nombreArchivo.isEmpty()) {
 
             try {
-                Path rutaArchivo = Paths.get(UPLOAD_DIR).resolve(nombreArchivo);
+
+                Path rutaArchivo = Paths.get(uploadDir).resolve(nombreArchivo);
                 Files.deleteIfExists(rutaArchivo);
 
-                // Limpiar campo en la base de datos
                 actividad.setArchivo(null);
                 actividadRepository.save(actividad);
 

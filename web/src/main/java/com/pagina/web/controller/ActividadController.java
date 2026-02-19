@@ -15,7 +15,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.pagina.web.model.actividad;
 import com.pagina.web.service.ActividadService;
-import com.pagina.web.service.ReaService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,7 +24,6 @@ import lombok.RequiredArgsConstructor;
 public class ActividadController {
 
     private final ActividadService actividadService;
-    private final ReaService reaService;
 
     @GetMapping
     public List<actividad> listar() {

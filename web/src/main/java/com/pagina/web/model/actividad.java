@@ -2,6 +2,8 @@ package com.pagina.web.model;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -42,6 +44,7 @@ public class actividad {
 
     @ManyToOne
     @JoinColumn(name = "rea_id", nullable = false)
+    @JsonIgnore
     private rea rea;
 
     @PrePersist

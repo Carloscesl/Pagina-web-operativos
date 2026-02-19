@@ -2,6 +2,8 @@ package com.pagina.web.model;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -37,6 +39,7 @@ public class rea {
 
     @ManyToOne
     @JoinColumn(name = "cadi_id", nullable = false)
+    @JsonIgnore
     private cadi cadi;
 
     @OneToMany(mappedBy = "rea", cascade = CascadeType.ALL, orphanRemoval = true)
