@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor de Actividades REA</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body { font-family: 'Nunito', sans-serif; background: #eef2f7; color: #1e293b; min-height: 100vh; display: flex; }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: 260px; min-height: 100vh;
+            background: #1e3a5f;
+            position: fixed; top: 0; left: 0;
+            display: flex; flex-direction: column;
+            z-index: 200;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+        }
+
+        .sidebar-brand {
+            padding: 24px 20px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .brand-pill {
+            display: inline-flex; align-items: center; gap: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px; padding: 10px 14px;
+            width: 100%;
+        }
+        .brand-icon {
+            width: 36px; height: 36px; border-radius: 8px;
+            background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 900; font-size: 14px; color: white; flex-shrink: 0;
+        }
+        .brand-text { color: white; }
+        .brand-text .title { font-size: 13px; font-weight: 800; line-height: 1.2; }
+        .brand-text .sub { font-size: 11px; opacity: 0.6; }
+
+        .sidebar-section-label {
+            padding: 20px 20px 8px;
+            font-size: 10px; font-weight: 800;
+            letter-spacing: 2px; text-transform: uppercase;
+            color: rgba(255,255,255,0.35);
+        }
+
+        .sidebar-nav { flex: 1; padding: 0 12px; }
+
+        .nav-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 14px; border-radius: 10px;
+            color: rgba(255,255,255,0.65);
+            font-size: 14px; font-weight: 700;
+            cursor: pointer; transition: all 0.2s;
+            margin-bottom: 4px; border: none; background: transparent;
+            width: 100%; text-align: left;
+        }
+        .nav-item:hover { background: rgba(255,255,255,0.1); color: white; }
+        .nav-item.active { background: rgba(56,189,248,0.2); color: #38bdf8; }
+
+        .nav-icon {
+            width: 32px; height: 32px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 15px; flex-shrink: 0;
+        }
+        .nav-icon-1 { background: rgba(251,146,60,0.2); }
+        .nav-icon-2 { background: rgba(167,139,250,0.2); }
+        .nav-icon-3 { background: rgba(52,211,153,0.2); }
+        .nav-icon-home { background: rgba(56,189,248,0.2); }
+
+        .sidebar-footer {
+            padding: 16px 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .sidebar-footer span { font-size: 11px; color: rgba(255,255,255,0.35); }
+
+        /* ── MAIN ── */
+        .main { margin-left: 260px; flex: 1; min-height: 100vh; }
+
+        .topbar {
+            background: white;
+            padding: 16px 36px;
+            display: flex; align-items: center; justify-content: space-between;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            position: sticky; top: 0; z-index: 100;
+        }
+        .topbar-title { font-size: 20px; font-weight: 900; color: #1e293b; }
+        .topbar-title span { color: #0ea5e9; }
+        .topbar-badge {
+            background: #e0f2fe; color: #0369a1;
+            font-size: 12px; font-weight: 700;
+            padding: 4px 12px; border-radius: 20px;
+        }
+
+        .content { padding: 36px; }
+
+        /* HOME */
+        .stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; margin-bottom: 28px; }
+        .stat-card {
+            background: white; border-radius: 16px; padding: 22px 24px;
+            display: flex; align-items: center; gap: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .stat-icon { width: 50px; height: 50px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+        .stat-icon-1 { background: #fef3c7; }
+        .stat-icon-2 { background: #dbeafe; }
+        .stat-icon-3 { background: #dcfce7; }
+        .stat-num { font-size: 26px; font-weight: 900; color: #1e293b; line-height: 1; }
+        .stat-label { font-size: 13px; color: #64748b; margin-top: 2px; font-weight: 600; }
+
+        .home-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+
+        .home-img-card {
+            background: white; border-radius: 16px; overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .home-img-card img { width: 100%; height: 200px; object-fit: cover; display: block; }
+        .home-img-card .img-footer {
+            padding: 16px 20px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .img-footer .uni { font-size: 13px; font-weight: 800; color: #1e3a5f; }
+        .img-footer a {
+            background: #0ea5e9; color: white;
+            padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 700;
+            text-decoration: none; transition: background 0.2s;
+        }
+        .img-footer a:hover { background: #0284c7; }
+
+        .home-info-card {
+            background: white; border-radius: 16px; padding: 28px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .info-tag {
+            display: inline-block; background: #e0f2fe; color: #0369a1;
+            font-size: 10px; font-weight: 800; letter-spacing: 1.5px;
+            text-transform: uppercase; padding: 4px 10px; border-radius: 6px;
+            margin-bottom: 12px;
+        }
+        .home-info-card h3 { font-size: 18px; font-weight: 900; color: #1e3a5f; margin-bottom: 12px; }
+        .home-info-card p { font-size: 14px; line-height: 1.75; color: #475569; }
+
+        /* REA SECTION */
+        .section-header {
+            display: flex; align-items: center; gap: 16px;
+            margin-bottom: 28px;
+        }
+        .section-pill {
+            background: #1e3a5f; color: white;
+            padding: 8px 18px; border-radius: 10px;
+            font-size: 12px; font-weight: 800; letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .section-header h2 { font-size: 26px; font-weight: 900; color: #1e293b; }
+
+        /* TASK CARDS */
+        .task-card {
+            background: white; border-radius: 16px;
+            overflow: hidden; height: 100%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            transition: transform 0.25s, box-shadow 0.25s;
+        }
+        .task-card:hover { transform: translateY(-5px); box-shadow: 0 12px 32px rgba(0,0,0,0.12); }
+
+        .task-card-top { height: 6px; }
+        .task-card-top-1 { background: linear-gradient(90deg, #fb923c, #f97316); }
+        .task-card-top-2 { background: linear-gradient(90deg, #a78bfa, #7c3aed); }
+        .task-card-top-3 { background: linear-gradient(90deg, #34d399, #059669); }
+
+        .card-content { padding: 22px; display: flex; flex-direction: column; justify-content: space-between; height: calc(100% - 6px); }
+        .task-label { font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #94a3b8; margin-bottom: 6px; }
+        .card-content h6 { font-size: 14px; font-weight: 800; color: #1e293b; margin-bottom: 20px; line-height: 1.5; }
+        .card-actions { display: flex; flex-direction: column; gap: 8px; }
+
+        .btn-act { width: 100%; padding: 9px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s; border: none; }
+        .btn-view { background: #f1f5f9; color: #475569; }
+        .btn-view:hover { background: #e2e8f0; }
+        .btn-upload { background: #0ea5e9; color: white; }
+        .btn-upload:hover { background: #0284c7; }
+        .btn-del { background: #fff1f2; color: #e11d48; }
+        .btn-del:hover { background: #ffe4e6; }
+
+        .file-inp { border: 1px solid #e2e8f0; border-radius: 8px; padding: 7px 10px; font-size: 12px; width: 100%; background: #f8fafc; font-family: 'Nunito', sans-serif; }
+
+        /* FLOATING */
+        .floating-btn {
+            position: fixed; bottom: 28px; right: 28px;
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            color: white; padding: 14px 22px; border-radius: 14px;
+            font-size: 13px; font-weight: 800; border: none;
+            box-shadow: 0 8px 24px rgba(14,165,233,0.4); z-index: 1200;
+            cursor: pointer; transition: all 0.25s;
+        }
+        .floating-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(14,165,233,0.5); }
+
+        /* MODAL */
+        .modal-content { border-radius: 16px; border: none; overflow: hidden; }
+        .modal-header { background: #1e3a5f; color: white; border: none; padding: 20px 24px; }
+        .modal-title { font-weight: 900; font-size: 17px; }
+        .modal-header .btn-close { filter: invert(1); }
+        .modal-body { padding: 24px; }
+        .modal-footer { border-top: 1px solid #f1f5f9; padding: 16px 24px; }
+        .form-label { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #64748b; }
+        .form-control, .form-select { border-radius: 8px; border: 1px solid #e2e8f0; font-family: 'Nunito', sans-serif; font-size: 14px; }
+        .form-control:focus, .form-select:focus { border-color: #0ea5e9; box-shadow: 0 0 0 3px rgba(14,165,233,0.15); }
+        .btn-save { background: linear-gradient(135deg, #0ea5e9, #0284c7); color: white; border: none; padding: 10px 24px; border-radius: 8px; font-size: 13px; font-weight: 800; cursor: pointer; }
+
+        .collapse { margin-top: 4px; }
+        .row.g-4 { --bs-gutter-y: 1.5rem; }
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-pill">
+                <div class="brand-icon">UC</div>
+                <div class="brand-text">
+                    <div class="title">Plataforma REA</div>
+                    <div class="sub">Sistemas Operativos</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar-section-label">Navegación</div>
+
+        <div class="sidebar-nav">
+            <button class="nav-item" onclick="goHome()">
+                <div class="nav-icon nav-icon-home">🏠</div>
+                Inicio
+            </button>
+            <div class="sidebar-section-label" style="padding-top:12px;">Módulos</div>
+            <button class="nav-item" onclick="toggleREA('rea1')">
+                <div class="nav-icon nav-icon-1">⚙️</div>
+                REA 1 — Procesos
+            </button>
+            <button class="nav-item" onclick="toggleREA('rea2')">
+                <div class="nav-icon nav-icon-2">💾</div>
+                REA 2 — Memoria
+            </button>
+            <button class="nav-item" onclick="toggleREA('rea3')">
+                <div class="nav-icon nav-icon-3">🖥️</div>
+                REA 3 — CPU
+            </button>
+        </div>
+
+        <div class="sidebar-footer">
+            <span>Universidad de Cundinamarca</span>
+        </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+        <div class="topbar">
+            <div class="topbar-title">Gestor de <span>Actividades</span></div>
+            <span class="topbar-badge">CADI · Sistemas Operativos</span>
+        </div>
+
+        <div class="content">
+
+            <!-- HOME -->
+            <div id="homeSection">
+                <div class="stats-row">
+                    <div class="stat-card">
+                        <div class="stat-icon stat-icon-1">📋</div>
+                        <div><div class="stat-num">3</div><div class="stat-label">Módulos REA</div></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon stat-icon-2">📝</div>
+                        <div><div class="stat-num">9</div><div class="stat-label">Actividades Totales</div></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon stat-icon-3">🎓</div>
+                        <div><div class="stat-num">1</div><div class="stat-label">CADI Activo</div></div>
+                    </div>
+                </div>
+
+                <div class="home-grid">
+                    <div class="home-img-card">
+                        <img src="https://www.ucundinamarca.edu.co/images/slider/2020/fachada.jpg" alt="Universidad de Cundinamarca">
+                        <div class="img-footer">
+                            <span class="uni">Universidad de Cundinamarca</span>
+                            <a href="https://www.polimetro.com/historia-de-los-sistemas-operativos/" target="_blank">Ver más</a>
+                        </div>
+                    </div>
+                    <div class="home-info-card">
+                        <div class="info-tag">Sobre el CADI</div>
+                        <h3>CADI Sistemas Operativos</h3>
+                        <p>Este CADI tiene como objetivo emplear las actividades básicas y esenciales de los sistemas operativos mediante la administración y gestión del software a la medida, tanto a nivel de usuario como a nivel de programación.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REA 1 -->
+            <div class="collapse" id="rea1">
+                <div class="section-header">
+                    <span class="section-pill">REA 1</span>
+                    <h2>Gestión de Procesos</h2>
+                </div>
+                <div class="row g-4" id="container1"></div>
+            </div>
+
+            <!-- REA 2 -->
+            <div class="collapse" id="rea2">
+                <div class="section-header">
+                    <span class="section-pill">REA 2</span>
+                    <h2>Memoria y Almacenamiento</h2>
+                </div>
+                <div class="row g-4" id="container2"></div>
+            </div>
+
+            <!-- REA 3 -->
+            <div class="collapse" id="rea3">
+                <div class="section-header">
+                    <span class="section-pill">REA 3</span>
+                    <h2>Planificación de CPU</h2>
+                </div>
+                <div class="row g-4" id="container3"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- TEMPLATE -->
+    <template id="taskTemplate">
+        <div class="col-md-4">
+            <div class="task-card">
+                <div class="task-card-top task-card-top-1"></div>
+                <div class="card-content">
+                    <div>
+                        <div class="task-label">Actividad</div>
+                        <h6>TITULO_TAREA</h6>
+                    </div>
+                    <div class="card-actions">
+                        <button class="btn-act btn-view">Previsualizar</button>
+                        <input type="file" class="file-inp">
+                        <button class="btn-act btn-upload">Subir Archivo</button>
+                        <button class="btn-act btn-del">Eliminar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- MODAL -->
+    <div class="modal fade" id="infoModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Añadir Material de Apoyo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <label class="form-label">Seleccionar REA</label>
+                    <select id="reaSelect" class="form-select mb-3">
+                        <option value="container1">REA 1 — Gestión de Procesos</option>
+                        <option value="container2">REA 2 — Memoria y Almacenamiento</option>
+                        <option value="container3">REA 3 — Planificación de CPU</option>
+                    </select>
+                    <label class="form-label">Título del Apoyo</label>
+                    <input type="text" id="tituloApoyo" class="form-control mb-3" placeholder="Título del material…">
+                    <label class="form-label">Descripción Breve</label>
+                    <textarea id="descripcionApoyo" class="form-control mb-3" rows="3" placeholder="Describe el material…"></textarea>
+                    <label class="form-label">Subir Archivo</label>
+                    <input type="file" class="form-control">
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-save" onclick="agregarApoyo()">Guardar Material</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="floating-btn" data-bs-toggle="modal" data-bs-target="#infoModal">+ Añadir Información</button>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_BASE = "http://localhost:8080/api";
+
+        /* ======================== */
+        /* NAVIGACIÓN */
+        /* ======================== */
+
+        function goHome() {
+            ['rea1','rea2','rea3'].forEach(id => {
+                const el = document.getElementById(id);
+                const bs = bootstrap.Collapse.getInstance(el);
+                if (bs) bs.hide();
+                el.classList.remove('show');
+            });
+            document.getElementById('homeSection').style.display = 'block';
+        }
+
+        function toggleREA(id) {
+            document.getElementById('homeSection').style.display = 'none';
+            ['rea1','rea2','rea3'].forEach(sec => {
+                if (sec !== id) {
+                    const el = document.getElementById(sec);
+                    const bs = bootstrap.Collapse.getInstance(el);
+                    if (bs) bs.hide();
+                    el.classList.remove('show');
+                }
+            });
+            new bootstrap.Collapse(document.getElementById(id), { toggle: true });
+        }
+
+        /* ======================== */
+        /* CARGAR ACTIVIDADES DESDE API */
+        /* ======================== */
+
+        async function cargarActividades() {
+            const response = await fetch(`${API_BASE}/actividades`);
+            const actividades = await response.json();
+
+            actividades.forEach(act => {
+                let containerId = "";
+
+                if (act.rea.id === 1) containerId = "container1";
+                if (act.rea.id === 2) containerId = "container2";
+                if (act.rea.id === 3) containerId = "container3";
+
+                renderTask(containerId, act);
+            });
+        }
+
+        function renderTask(containerId, actividad) {
+            const container = document.getElementById(containerId);
+            const template = document.getElementById('taskTemplate');
+
+            const clone = template.content.cloneNode(true);
+
+            clone.querySelector("h6").innerText = actividad.titulo;
+
+            const btnView = clone.querySelector(".btn-view");
+            const btnUpload = clone.querySelector(".btn-upload");
+            const btnDelete = clone.querySelector(".btn-del");
+            const fileInput = clone.querySelector(".file-inp");
+
+            /* Previsualizar */
+            btnView.onclick = () => {
+                if (actividad.archivo) {
+                    window.open(`/uploads/${actividad.archivo}`, "_blank");
+                } else {
+                    alert("No hay archivo cargado.");
+                }
+            };
+
+            /* Subir archivo */
+            btnUpload.onclick = async () => {
+                if (!fileInput.files.length) {
+                    alert("Selecciona un archivo.");
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append("file", fileInput.files[0]);
+
+                await fetch(`${API_BASE}/actividades/${actividad.id}/archivo`, {
+                    method: "POST",
+                    body: formData
+                });
+
+                alert("Archivo subido correctamente");
+                location.reload();
+            };
+
+            /* Eliminar actividad */
+            btnDelete.onclick = async () => {
+                if (!confirm("¿Eliminar esta actividad?")) return;
+
+                await fetch(`${API_BASE}/actividades/${actividad.id}`, {
+                    method: "DELETE"
+                });
+
+                alert("Actividad eliminada");
+                location.reload();
+            };
+
+            container.appendChild(clone);
+        }
+
+        /* ======================== */
+        /* AGREGAR RECURSO DESDE MODAL */
+        /* ======================== */
+
+        async function agregarApoyo() {
+
+            const containerId = document.getElementById('reaSelect').value;
+            const titulo = document.getElementById('tituloApoyo').value;
+            const descripcion = document.getElementById('descripcionApoyo').value;
+
+            let reaId = 1;
+            if (containerId === "container2") reaId = 2;
+            if (containerId === "container3") reaId = 3;
+
+            const response = await fetch(`${API_BASE}/recursos?reaId=${reaId}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    nombre: titulo,
+                    descripcion: descripcion
+                })
+            });
+
+            if (response.ok) {
+                alert("Recurso agregado correctamente");
+                bootstrap.Modal.getInstance(document.getElementById('infoModal')).hide();
+            } else {
+                alert("Error al guardar recurso");
+            }
+        }
+
+        /* ======================== */
+        /* INICIALIZAR */
+        /* ======================== */
+
+        document.addEventListener("DOMContentLoaded", () => {
+            cargarActividades();
+        });
+</script>
+
+</body>
+</html>
