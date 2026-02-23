@@ -59,8 +59,7 @@ public class ActividadService {
 
         try {
 
-            Path uploadPath = Paths.get(System.getProperty("user.dir"), uploadDir);
-
+            Path uploadPath = Paths.get(uploadDir).toAbsolutePath().normalize();
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath);
             }
@@ -92,7 +91,9 @@ public class ActividadService {
 
             try {
 
-                Path rutaArchivo = Paths.get(System.getProperty("user.dir"), uploadDir)
+                Path rutaArchivo = Paths.get(uploadDir)
+                        .toAbsolutePath()
+                        .normalize()
                         .resolve(nombreArchivo);
                 Files.deleteIfExists(rutaArchivo);
 
