@@ -1,225 +1,29 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gestor REA</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-<style>
-body{margin:0;font-family:Arial;background:#f1f5f9}
-.sidebar{
-width:260px;height:100vh;position:fixed;
-background:#1e3a5f;color:white;padding:20px;overflow:auto;
-}
-.sidebar h4{margin-bottom:20px;font-weight:bold}
-.nav-item{
-width:100%;background:transparent;border:none;
-color:white;text-align:left;padding:10px;
-border-radius:6px;margin-bottom:5px;
-}
-.nav-item:hover{background:rgba(255,255,255,0.15)}
-.main{margin-left:260px;padding:30px}
-.task-card{
-background:white;padding:20px;border-radius:10px;
-box-shadow:0 3px 10px rgba(0,0,0,0.1);
-margin-bottom:20px;
-}
-.task-title{font-weight:bold;font-size:15px;margin-bottom:10px}
-.task-actions button{
-margin-right:5px;margin-top:5px;
-}
-.file-inp{margin-top:8px}
-.hidden{display:none}
-</style>
+    <meta charset="UTF-8">
+    <title>Repositorio Académico</title>
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
-
 <body>
 
-<div class="sidebar">
-<h4>📚 CADIs</h4>
-<div id="cadiContainer"></div>
+<div class="container">
+
+    <aside class="sidebar">
+        <h2>Repositorio</h2>
+        <ul id="menu">
+            <li onclick="loadHome()">🏠 Home</li>
+            <hr>
+        </ul>
+    </aside>
+
+    <main class="main-content" id="mainContent">
+        <h1>Bienvenido</h1>
+        <p>Repositorio académico.</p>
+    </main>
+
 </div>
 
-<div class="main">
-<h2 id="sectionTitle">Seleccione un REA</h2>
-<hr>
-<div id="actividadContainer" class="row"></div>
-</div>
-
-<template id="taskTemplate">
-<div class="col-md-4">
-<div class="task-card">
-<div class="task-title"></div>
-<div class="task-actions"></div>
-</div>
-</div>
-</template>
-
-<script>
-const API_BASE = "http://localhost:8080/api";
-
-/* ======================= */
-/* CARGAR CADIS */
-/* ======================= */
-async function cargarCadis(){
-const res = await fetch(`${API_BASE}/cadis`);
-const cadis = await res.json();
-
-const container = document.getElementById("cadiContainer");
-container.innerHTML = "";
-
-cadis.forEach(cadi=>{
-const btn = document.createElement("button");
-btn.className="nav-item";
-btn.innerText="📘 "+cadi.nombre;
-btn.onclick=()=>toggleReas(cadi.id);
-container.appendChild(btn);
-
-const reaDiv=document.createElement("div");
-reaDiv.id="reas-"+cadi.id;
-reaDiv.classList.add("hidden");
-reaDiv.style.marginLeft="15px";
-container.appendChild(reaDiv);
-});
-}
-
-/* ======================= */
-/* MOSTRAR REAS */
-/* ======================= */
-async function toggleReas(cadiId){
-
-const container=document.getElementById("reas-"+cadiId);
-
-if(!container.classList.contains("hidden")){
-container.classList.add("hidden");
-return;
-}
-
-const res=await fetch(`${API_BASE}/reas?cadiId=${cadiId}`);
-const reas=await res.json();
-
-container.innerHTML="";
-
-reas.forEach(rea=>{
-const btn=document.createElement("button");
-btn.className="nav-item";
-btn.style.fontSize="13px";
-btn.innerText="📂 "+rea.nombre;
-btn.onclick=()=>cargarActividades(rea.id,rea.nombre);
-container.appendChild(btn);
-});
-
-container.classList.remove("hidden");
-}
-
-/* ======================= */
-/* CARGAR ACTIVIDADES */
-/* ======================= */
-async function cargarActividades(reaId,nombreRea){
-
-document.getElementById("sectionTitle").innerText="REA: "+nombreRea;
-
-const res=await fetch(`${API_BASE}/actividades?reaId=${reaId}`);
-const actividades=await res.json();
-
-const container=document.getElementById("actividadContainer");
-container.innerHTML="";
-
-actividades.forEach(act=>{
-renderActividad(act);
-});
-}
-
-/* ======================= */
-/* RENDER ACTIVIDAD */
-/* ======================= */
-function renderActividad(actividad){
-
-const template=document.getElementById("taskTemplate");
-const clone=template.content.cloneNode(true);
-
-clone.querySelector(".task-title").innerText=
-actividad.titulo || "Sin título";
-
-const actionDiv = clone.querySelector(".task-actions");
-
-/* ===================== */
-/* SI TIENE ARCHIVO */
-/* ===================== */
-if(actividad.archivo){
-
-const btnView=document.createElement("button");
-btnView.className="btn btn-sm btn-success";
-btnView.innerText="Ver Archivo";
-btnView.onclick=()=>{
-window.open(`/uploads/${actividad.archivo}`,"_blank");
-};
-
-const btnDeleteFile=document.createElement("button");
-btnDeleteFile.className="btn btn-sm btn-warning";
-btnDeleteFile.innerText="Eliminar Archivo";
-btnDeleteFile.onclick=async()=>{
-if(!confirm("¿Eliminar archivo?")) return;
-
-await fetch(`${API_BASE}/actividades/${actividad.id}/archivo`,{
-method:"DELETE"
-});
-
-alert("Archivo eliminado");
-cargarActividades(actividad.rea.id, document.getElementById("sectionTitle").innerText.replace("REA: ",""));
-};
-
-actionDiv.appendChild(btnView);
-actionDiv.appendChild(btnDeleteFile);
-
-}
-
-/* ===================== */
-/* SI NO TIENE ARCHIVO */
-/* ===================== */
-else{
-
-const fileInput=document.createElement("input");
-fileInput.type="file";
-fileInput.className="form-control file-inp";
-
-const btnUpload=document.createElement("button");
-btnUpload.className="btn btn-sm btn-primary";
-btnUpload.innerText="Subir Archivo";
-btnUpload.onclick=async()=>{
-if(!fileInput.files.length){
-alert("Seleccione un archivo");
-return;
-}
-
-const formData=new FormData();
-formData.append("file",fileInput.files[0]);
-
-await fetch(`${API_BASE}/actividades/${actividad.id}/archivo`,{
-method:"POST",
-body:formData
-});
-
-alert("Archivo subido");
-cargarActividades(actividad.rea.id, document.getElementById("sectionTitle").innerText.replace("REA: ",""));
-};
-
-actionDiv.appendChild(fileInput);
-actionDiv.appendChild(btnUpload);
-
-}
-
-document.getElementById("actividadContainer").appendChild(clone);
-}
-
-/* ======================= */
-/* INICIALIZAR */
-/* ======================= */
-document.addEventListener("DOMContentLoaded",()=>{
-cargarCadis();
-});
-</script>
-
+<script src="/js/app.js"></script>
 </body>
 </html>

@@ -3,6 +3,7 @@ package com.pagina.web.model;
 import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -44,7 +45,7 @@ public class actividad {
 
     @ManyToOne
     @JoinColumn(name = "rea_id", nullable = false)
-    @JsonIgnore
+    @JsonIgnoreProperties("actividades") // Evita la serialización de la lista de actividades en rea
     private rea rea;
 
     @PrePersist

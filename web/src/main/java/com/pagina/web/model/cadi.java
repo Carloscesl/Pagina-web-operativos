@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name = "cadi")
 @Data
@@ -26,5 +28,6 @@ public class cadi {
     private Integer totalActividades;
 
     @OneToMany(mappedBy = "cadi", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties("cadi") // Evita la serialización de la referencia a cadi en rea
     private List<rea> reas;
 }
